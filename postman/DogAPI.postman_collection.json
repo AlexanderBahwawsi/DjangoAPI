@@ -1,0 +1,256 @@
+{
+  "info": {
+    "name": "DogAPI",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    }
+  ],
+  "item": [
+    {
+      "name": "Breeds",
+      "item": [
+        {
+          "name": "POST breed",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/breeds/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "breeds"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Labrador Retriever\",\n  \"size\": \"Large\",\n  \"friendliness\": 5,\n  \"trainability\": 5,\n  \"sheddingamount\": 4,\n  \"exerciseneeds\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET breeds (list)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/breeds/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "breeds"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET breed 1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/breeds/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "breeds",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT breed 1",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/breeds/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "breeds",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Labrador Retriever\",\n  \"size\": \"Large\",\n  \"friendliness\": 5,\n  \"trainability\": 4,\n  \"sheddingamount\": 3,\n  \"exerciseneeds\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE breed 1",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/breeds/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "breeds",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dogs",
+      "item": [
+        {
+          "name": "POST dog",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dogs/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dogs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Buddy\",\n  \"age\": 3,\n  \"breed\": 1,\n  \"gender\": \"Male\",\n  \"color\": \"Yellow\",\n  \"favoritefood\": \"Chicken\",\n  \"favoritetoy\": \"Tennis ball\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "GET dogs (list)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dogs/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dogs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET dog 1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dogs/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dogs",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT dog 1",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/dogs/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dogs",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Buddy\",\n  \"age\": 4,\n  \"breed\": 1,\n  \"gender\": \"Male\",\n  \"color\": \"Golden\",\n  \"favoritefood\": \"Salmon\",\n  \"favoritetoy\": \"Rope\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "DELETE dog 1",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/dogs/1/",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "dogs",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
