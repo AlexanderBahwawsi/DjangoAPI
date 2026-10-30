@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9!+b*yp#b()1kfnn4triu_&^p*&9&kp0-3zm2n!we1-0-%5q7!'
+# Read from the environment (set in .env / docker-compose) with a dev fallback.
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-9!+b*yp#b()1kfnn4triu_&^p*&9&kp0-3zm2n!we1-0-%5q7!',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    if h.strip()
+]
 
 
 # Application definition
@@ -73,11 +82,23 @@ WSGI_APPLICATION = 'dogserver.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# https://docs.djangoproject.com/en/5.2/ref/databases/#postgresql-notes
+#
+# PostgreSQL replaces the default SQLite backend. Connection details come from
+# environment variables so the same settings work in docker-compose (where the
+# host is the `db` service) and on a developer machine. The psycopg driver is
+# listed in requirements.txt.
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB', 'dogapi'),
+        'USER': os.environ.get('POSTGRES_USER', 'dogapi'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'dogapi'),
+        'HOST': os.environ.get('POSTGRES_HOST', 'db'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        # Keep connections open between requests instead of reconnecting each time
+        'CONN_MAX_AGE': 60,
     }
 }
 

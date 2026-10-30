@@ -1,13 +1,66 @@
 # DjangoAPI — Dog and Breed REST API
 
-A Django + Django REST Framework project exposing CRUD endpoints for `Dog` and `Breed` records.
+A Django + Django REST Framework project exposing CRUD endpoints for `Dog` and `Breed` records,
+containerized with Docker and backed by PostgreSQL.
 
-## Setup
+## Running with Docker (recommended)
+
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Docker Compose v2).
+
+```bash
+docker compose up --build
+```
+
+That builds the `app` image and starts two services:
+
+| Service | Image                       | Role                                                      |
+|---------|-----------------------------|-----------------------------------------------------------|
+| `app`   | built from `Dockerfile`     | Django + DRF dev server on port 8000, runs migrations on start |
+| `db`    | `postgres:16-alpine`        | PostgreSQL database, data persisted in the `postgres_data` volume |
+
+The API is then available at `http://localhost:8000/api/`. Stop with `Ctrl+C` or
+`docker compose down` (add `-v` to also wipe the database volume).
+
+### How the containerization works
+
+- **`Dockerfile`** — encapsulates every dependency: Python 3.13, the `libpq` client library
+  that `psycopg` needs, `pg_isready` for the startup wait, and the Python packages from
+  `requirements.txt`. The application source is deliberately *not* `COPY`'d into the image.
+- **`docker-compose.yml`** — defines the `app` and `db` services on a shared network. `app`
+  reaches the database by the hostname `db`. `depends_on` with a `pg_isready` healthcheck means
+  the app container is not started until Postgres accepts connections.
+- **Volumes** — the project directory is bind-mounted to `/app` inside the `app` container
+  (`.:/app`), so code changes on the host are picked up immediately by `runserver`'s auto-reload
+  with no rebuild. A named volume `postgres_data` keeps the database between restarts.
+- **`entrypoint.sh`** — waits for Postgres, runs `python manage.py migrate`, then starts the
+  dev server.
+- **PostgreSQL instead of SQLite** — `dogserver/settings.py` now uses
+  `django.db.backends.postgresql` (see the
+  [Django database docs](https://docs.djangoproject.com/en/5.2/ref/databases/#postgresql-notes))
+  with connection settings read from environment variables (`POSTGRES_DB`, `POSTGRES_USER`,
+  `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`). `psycopg[binary]` is the driver.
+- **Configuration** — defaults are set in `docker-compose.yml`; copy `.env.example` to `.env`
+  to override them (`.env` is git-ignored).
+
+### Useful commands
+
+```bash
+docker compose ps                                  # see both services running
+docker compose logs -f app                         # follow the Django log
+docker compose exec app python manage.py createsuperuser
+docker compose exec db psql -U dogapi -d dogapi    # open a psql shell on the database
+```
+
+## Running without Docker
+
+You need a local PostgreSQL server; set the `POSTGRES_*` environment variables to point at it
+(the defaults assume host `db`, so at minimum set `POSTGRES_HOST=localhost`).
 
 ```bash
 python -m venv venv
 venv\Scripts\activate        # Windows (use `source venv/bin/activate` on macOS/Linux)
 pip install -r requirements.txt
+set POSTGRES_HOST=localhost  # export POSTGRES_HOST=localhost on macOS/Linux
 python manage.py migrate
 python manage.py runserver
 ```
@@ -73,3 +126,8 @@ curl -X POST http://127.0.0.1:8000/api/dogs/ -H "Content-Type: application/json"
 Each endpoint was tested with Postman, one request per method type for each model
 (GET list, POST, GET detail, PUT, DELETE for both `/api/breeds/` and `/api/dogs/`),
 ten requests in total. The screenshots are submitted separately with the assignment.
+
+The containerized version was tested by running `docker compose up --build`, confirming both
+services are healthy with `docker compose ps`, and re-running the same ten requests against
+`http://localhost:8000/api/`. The migrated tables can be seen in Postgres with
+`docker compose exec db psql -U dogapi -d dogapi -c "\dt"`.

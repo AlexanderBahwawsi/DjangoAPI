@@ -1,0 +1,61 @@
+# Two-service microservice architecture for the DogAPI project.
+#
+#   app - the Django + DRF application (built from ./Dockerfile)
+#   db  - PostgreSQL 16, replacing the default SQLite database
+#
+# Usage:
+#   docker compose up --build        # build the image and start both services
+#   docker compose down              # stop and remove containers
+#   docker compose down -v           # ...and also delete the Postgres data volume
+#
+# Configuration comes from a .env file if one exists (see .env.example);
+# otherwise the ${VAR:-default} values below are used, so a fresh clone runs
+# with no extra setup.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dogapi-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-dogapi}
+      POSTGRES_USER: ${POSTGRES_USER:-dogapi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dogapi}
+    volumes:
+      # Named volume so database contents survive container restarts
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-dogapi} -d ${POSTGRES_DB:-dogapi}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dogapi-app
+    restart: unless-stopped
+    environment:
+      # The app reaches the database by the service name on the compose network
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-dogapi}
+      POSTGRES_USER: ${POSTGRES_USER:-dogapi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dogapi}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-in-production}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+    volumes:
+      # Bind-mount the project source into the container. The code is not baked
+      # into the image, so edits on the host are reflected immediately
+      # (Django's runserver auto-reloads on change).
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
